@@ -6,11 +6,11 @@ namespace UnityStandardAssets.Cameras
 {
     public class ProtectCameraFromWallClip : MonoBehaviour
     {
-        public float clipMoveTime = 0.05f;              // time taken to move when avoiding cliping (low value = fast, which it should be)
+        public float clipMoveTime = 0.06f;              // time taken to move when avoiding cliping (low value = fast, which it should be)
         public float returnTime = 0.4f;                 // time taken to move back towards desired position, when not clipping (typically should be a higher value than clipMoveTime)
         public float sphereCastRadius = 0.1f;           // the radius of the sphere used to test for object between camera and target
         public bool visualiseInEditor;                  // toggle for visualising the algorithm through lines for the raycast in the editor
-        public float closestDistance = 0.5f;            // the closest distance the camera can be from the target
+        public float closestDistance = 1.0f;            // the closest distance the camera can be from the target
         public bool protecting { get; private set; }    // used for determining if there is an object between the target and the camera
         public string dontClipTag = "Player";           // don't clip against objects with this tag (useful for not clipping against the targeted object)
 

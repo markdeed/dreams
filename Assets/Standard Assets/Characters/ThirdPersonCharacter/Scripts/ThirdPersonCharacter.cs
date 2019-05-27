@@ -28,32 +28,82 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		Vector3 m_CapsuleCenter;
 		CapsuleCollider m_Capsule;
 		bool m_Crouching;
+        public Transform spineTransform;
+        public Transform pelvisTransform;
+        public GameObject avatar;
 
-
-		void Start()
+        void Start()
 		{
 			m_Animator = GetComponent<Animator>();
 			m_Rigidbody = GetComponent<Rigidbody>();
 			m_Capsule = GetComponent<CapsuleCollider>();
 			m_CapsuleHeight = m_Capsule.height;
 			m_CapsuleCenter = m_Capsule.center;
-
-			m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+            spineTransform = GetComponent<Transform>().Find("/ThirdPersonController/aj/Hips/Spine");
+            pelvisTransform = GetComponent<Transform>().Find("/ThirdPersonController/aj/Hips/Pelvis");
+            // avatar = GetComponent<GameObject>().
+            m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 			m_OrigGroundCheckDistance = m_GroundCheckDistance;
 		}
+        void update()
+        {
+
+        }
+        void LateUpdate()
+        {
+            float targetRotationX = Camera.main.transform.rotation.eulerAngles.x;
 
 
-		public void Move(Vector3 move, bool crouch, bool jump,bool flash)
+
+            float targetRotationY = Camera.main.transform.rotation.eulerAngles.y;
+            float pelvisRotation = pelvisTransform.rotation.eulerAngles.y;     
+
+
+            float relativeRotation = targetRotationY - pelvisRotation;
+            
+            Debug.Log("rotationY="+ targetRotationY + " relativeRotation=" + relativeRotation );
+
+            if (spineTransform != null)
+            {
+                spineTransform.eulerAngles = new Vector3(targetRotationX, targetRotationY, 0);
+
+               
+            }
+            
+        }
+       
+        private float minAngle(float angle,float arc)
+        {
+            angle = angle - arc;
+            if (angle < 0)
+            {
+                angle = 360f + angle;
+            }
+            return angle;
+        }
+        private float maxAngle(float angle, float arc)
+        {
+            angle = angle + arc;
+            if (angle > 360)
+            {
+                angle = angle - 360f;
+            }
+            return angle;
+        }
+        public void Move(Vector3 move, bool crouch, bool jump,bool flash)
 		{
-
-			// convert the world relative moveInput vector into a local-relative
-			// turn amount and forward amount required to head in the desired
-			// direction.
-			if (move.magnitude > 1f) move.Normalize();
+            
+            // convert the world relative moveInput vector into a local-relative
+            // turn amount and forward amount required to head in the desired
+            // direction.
+            if (move.magnitude > 1f) move.Normalize();
 			move = transform.InverseTransformDirection(move);
 			CheckGroundStatus();
 			move = Vector3.ProjectOnPlane(move, m_GroundNormal);
-			m_TurnAmount = Mathf.Atan2(move.x, move.z);
+
+            
+
+            m_TurnAmount = Mathf.Atan2(move.x, move.z);
 			m_ForwardAmount = move.z;
 
 			ApplyExtraTurnRotation();
