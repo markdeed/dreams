@@ -45,51 +45,51 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 			m_OrigGroundCheckDistance = m_GroundCheckDistance;
 		}
-        void update()
-        {
 
+        Vector3 AngleLerp(Vector3 StartAngle, Vector3 FinishAngle, float t)
+        {
+            float xLerp = Mathf.LerpAngle(StartAngle.x, FinishAngle.x, t);
+            float yLerp = Mathf.LerpAngle(StartAngle.y, FinishAngle.y, t);
+            float zLerp = Mathf.LerpAngle(StartAngle.z, FinishAngle.z, t);
+            Vector3 Lerped = new Vector3(xLerp, yLerp, zLerp);
+            return Lerped;
         }
         void LateUpdate()
         {
             float targetRotationX = Camera.main.transform.rotation.eulerAngles.x;
-
-
-
             float targetRotationY = Camera.main.transform.rotation.eulerAngles.y;
-            float pelvisRotation = pelvisTransform.rotation.eulerAngles.y;     
-
-
-            float relativeRotation = targetRotationY - pelvisRotation;
-            
-            Debug.Log("rotationY="+ targetRotationY + " relativeRotation=" + relativeRotation );
-
+            float pelvisRotation = pelvisTransform.rotation.eulerAngles.y;
+            Quaternion rotY = Quaternion.AngleAxis(targetRotationY, Vector3.up);
             if (spineTransform != null)
             {
-                spineTransform.eulerAngles = new Vector3(targetRotationX, targetRotationY, 0);
+               
+                
+                float maxAngle = 120f;
+                Quaternion center = pelvisTransform.rotation; ;
+
+                if (Quaternion.Angle(center, rotY) > maxAngle)
+                {
+
+                    //Debug.Log("too far");
+                    //anglelerp back
+                    Vector3 startAngle = spineTransform.eulerAngles;
+                    Vector3 targetAngle = pelvisTransform.eulerAngles;
+                   // spineTransform.eulerAngles = AngleLerp(startAngle, targetAngle, 10f);//new Vector3(targetRotationX, targetRotationY, 0);
+                    spineTransform.eulerAngles = pelvisTransform.eulerAngles;
+                }
+                else
+                {
+                    //Debug.Log("ok");
+                    spineTransform.eulerAngles = new Vector3(targetRotationX, targetRotationY, 0);
+                }
 
                
+
+
             }
             
         }
        
-        private float minAngle(float angle,float arc)
-        {
-            angle = angle - arc;
-            if (angle < 0)
-            {
-                angle = 360f + angle;
-            }
-            return angle;
-        }
-        private float maxAngle(float angle, float arc)
-        {
-            angle = angle + arc;
-            if (angle > 360)
-            {
-                angle = angle - 360f;
-            }
-            return angle;
-        }
         public void Move(Vector3 move, bool crouch, bool jump,bool flash)
 		{
             
@@ -100,8 +100,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			move = transform.InverseTransformDirection(move);
 			CheckGroundStatus();
 			move = Vector3.ProjectOnPlane(move, m_GroundNormal);
-
-            
 
             m_TurnAmount = Mathf.Atan2(move.x, move.z);
 			m_ForwardAmount = move.z;
